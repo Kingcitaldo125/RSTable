@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Scratchpad
+*scratch.txt
+*/scratch.txt
