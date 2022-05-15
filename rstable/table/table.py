@@ -11,9 +11,6 @@ class Row:
 	def get_id(self):
 		return self.row_id
 
-	def add_cell(self, item):
-		self.cells.append(item)
-
 	def get_num_cells(self):
 		return len(self.cells)
 
@@ -29,24 +26,54 @@ class Row:
 
 		return (num_buffs + largest_cell) * len(self.cells)
 
+	def add_cell_content(self, item: str):
+		self.cells.append(item)
+
+	def get_cell_content(self, cell_idx: int):
+		if cell_idx < 0 or cell_idx >= len(self.cells):
+			return None
+
+		return self.cells[cell_idx]
+
 class Table:
 	def __init__(self, rows, cols):
 		self.headers = []
 		self.rows = []
+		self.row_map = {}
+
+		# TBD: Get rid of columns array in favor of a row's internal array
 		self.columns = []
 		self.cell_buffer = 1
-		
+
 		for i in range(rows):
 			self.add_row()
 
 		for i in range(cols):
-			self.add_column()
+			self.add_column(i+1)
 
 	def add_row(self):
-		self.rows.append(Row(len(self.rows) + 1))
+		row_id = len(self.rows) + 1
+		rrow = Row(row_id)
 
-	def add_column(self):
-		self.columns.append(Row(len(self.columns) + 1))
+		self.rows.append(rrow)
+		self.row_map[row_id] = rrow
+
+	# TBD: Refactor out in favor of a row's internal array
+	def add_column(self, row_id):
+		self.columns.append(Row(row_id))
+
+	def add_item(self, strng, index):
+		if index < 0 or index >= len(self.rows):
+			return -1
+
+		self.rows[index].add_cell_content(strng)
+		return 0
+
+	def get_row_by_id(self, id):
+		try:
+			return self.row_map[id]
+		except KeyError as e:
+			return None
 
 	def get_longest_cell(self):
 		lng = 1
@@ -68,28 +95,38 @@ class Table:
 		return border
 
 	def make_row(self):
-		row = "|"
+		row_str = "|"
 		longest_cell = self.get_longest_cell()
 
 		for i in range(len(self.columns)):
-			row += " " * self.cell_buffer
-			row += " " * self.cell_buffer
-			row += "|"
+			row_str += " " * self.cell_buffer
+			# Cell content goes here
+			row_str += " " * self.cell_buffer
+			row_str += "|"
 
-		return row
+		return row_str
 
 	def make_table(self):
 		table_str = self.make_table_border()
 		table_str += "\n"
 
-		for i in range(len(self.rows)):
+		for i in range(len(self.rows)-1):
 			table_str += self.make_row()
 			table_str += "\n"
 			table_str += self.make_table_border()
 			table_str += "\n"
 
+		table_str += self.make_row()
+		table_str += "\n"
+		table_str += self.make_table_border()
+
 		return table_str
 
 if __name__ == "__main__":
 	table = Table(3,7)
-	print(table.make_table())
+
+	#print(table.add_item("asdf", 0))
+
+	str_table = table.make_table()
+
+	print(str_table)
