@@ -29,11 +29,15 @@ class Row:
 	def add_cell_content(self, item: str):
 		self.cells.append(item)
 
-	def get_cell_content(self, cell_idx: int):
+	def get_cell_content(self, cell_idx: int) -> str:
 		if cell_idx < 0 or cell_idx >= len(self.cells):
-			return None
+			return ""
 
 		return self.cells[cell_idx]
+
+	def get_cell_length(self, cell_idx: int):
+		cc = self.get_cell_content(cell_idx)
+		return len(cc) + (self.cell_buffer * 2)
 
 class Table:
 	def __init__(self, rows, cols):
@@ -83,49 +87,82 @@ class Table:
 
 		return lng
 
+	def get_largest_number_cells(self):
+		mmax = 0
+
+		for row in self.rows:
+			mmax = max(mmax, row.get_num_cells())
+
+		return mmax
+
 	def make_table_border(self):
 		border = "+"
 		longest_cell = self.get_longest_cell()
+		total_cells = self.get_largest_number_cells()
 
-		for i in range(len(self.columns)):
+		for i in range(total_cells):
 			for j in range(longest_cell):
 				border += "-"
 			border += "+"
 
 		return border
 
-	def make_row(self):
+	def make_row(self, row_idx, longest_cell):
 		row_str = "|"
-		longest_cell = self.get_longest_cell()
+		rrow = self.rows[row_idx]
+		total_cells = self.get_largest_number_cells()
 
-		for i in range(len(self.columns)):
+		#cell_idx = 0
+
+		for cell_idx in range(total_cells):
 			row_str += " " * self.cell_buffer
-			# Cell content goes here
+
+			# Add cell content
+			ccontent = rrow.get_cell_content(cell_idx)
+			row_str += ccontent
+			
+			# Pad the remainder of the cell with spaces.
+			# This will be relative to the length
+			# of the longest cell, minus the cell buffer char.
+			cell_length = rrow.get_cell_length(cell_idx)
+			if cell_length < longest_cell:
+				ddiff = longest_cell - cell_length
+				for j in range(ddiff):
+					row_str += " "
+
+			# Append the buffer to the string
 			row_str += " " * self.cell_buffer
 			row_str += "|"
 
 		return row_str
 
 	def make_table(self):
+		num_rows = len(self.rows)
+		longest_cell = self.get_longest_cell()
+
 		table_str = self.make_table_border()
 		table_str += "\n"
 
-		for i in range(len(self.rows)-1):
-			table_str += self.make_row()
+		for i in range(num_rows-1):
+			table_str += self.make_row(i, longest_cell)
 			table_str += "\n"
 			table_str += self.make_table_border()
 			table_str += "\n"
 
-		table_str += self.make_row()
+		table_str += self.make_row(num_rows-1, longest_cell)
 		table_str += "\n"
 		table_str += self.make_table_border()
 
 		return table_str
 
 if __name__ == "__main__":
-	table = Table(3,7)
+	table = Table(1,7)
 
-	#print(table.add_item("asdf", 0))
+	print(table.add_item("asdf", 0))
+	print(table.add_item("fafsa", 0))
+	table.add_row()
+	print(table.add_item("greek", 1))
+	print(table.add_item("fafsa", 1))
 
 	str_table = table.make_table()
 
