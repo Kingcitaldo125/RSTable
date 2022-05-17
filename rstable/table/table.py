@@ -1,12 +1,8 @@
-import re
-
 class Row:
 	def __init__(self, id):
 		self.row_id = id
 		self.cells = []
 		self.cell_buffer = 1
-		self.large_cell_regex_pattern = r"(\s[^|]+\s)"
-		self.large_cell_regex = re.compile(self.large_cell_regex_pattern)
 
 	def get_id(self):
 		return self.row_id
