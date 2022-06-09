@@ -67,6 +67,7 @@ class Table:
 			return -1
 
 		self.rows[index].add_cell_content(strng)
+
 		return 0
 
 	def get_row_by_id(self, id):
